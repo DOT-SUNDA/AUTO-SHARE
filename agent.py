@@ -248,6 +248,10 @@ def index():
             # 2. Timpa file target_email.txt
             with open(TARGET_FILE, 'w') as f:
                 f.write(target_email)
+                
+            idx_file_path = os.path.join(BASE_DIR, 'idx_project_urls.txt')
+            with open(idx_file_path, 'w') as f:
+                f.write('')    
 
             # 3. Jalankan Worker dengan xvfb-run (Background Process)
             if os.path.exists(WORKER_SCRIPT):
