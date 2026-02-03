@@ -60,7 +60,7 @@ fi
 
 # 3. INSTALL PYTHON LIBRARIES
 echo -e "\n${GREEN}[+] Install Python Libraries...${NC}"
-pip3 install selenium pyautogui psutil requests pyperclip --break-system-packages --ignore-installed
+pip3 install flask selenium pyautogui psutil requests pyperclip --break-system-packages --ignore-installed
 
 # 4. DOWNLOAD MAIN.PY (STATIC)
 mkdir -p "$DIR"
@@ -77,7 +77,7 @@ After=network.target
 [Service]
 User=root
 WorkingDirectory=$DIR
-ExecStart=python3 agent.py
+ExecStart=/usr/bin/python3 $DIR/agent.py
 Restart=always
 RestartSec=5
 StandardOutput=append:$DIR/service.log
