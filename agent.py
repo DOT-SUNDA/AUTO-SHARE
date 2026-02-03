@@ -8,7 +8,7 @@ app.secret_key = 'kuncirahasia_bot_panel_xvfb'
 
 # Path file di folder yang sama dengan script ini
 BASE_DIR = os.getcwd()
-WORKER_SCRIPT = os.path.join(BASE_DIR, "worker.py")
+WORKER_SCRIPT = os.path.join(BASE_DIR, "main.py")
 EMAIL_FILE = os.path.join(BASE_DIR, "email.txt")
 TARGET_FILE = os.path.join(BASE_DIR, "target_email.txt")
 
@@ -281,7 +281,7 @@ def index():
     return render_template_string(HTML_TEMPLATE, 
                                   current_accounts=current_accounts, 
                                   current_target=current_target,
-                                  worker_name="worker.py")
+                                  worker_name="main.py")
 
 # ================= M A I N =================
 if __name__ == '__main__':
