@@ -6,11 +6,14 @@ from flask import Flask, request, render_template_string, flash, redirect, url_f
 app = Flask(__name__)
 app.secret_key = 'kuncirahasia_bot_panel_xvfb'
 
-# Path file di folder yang sama dengan script ini
-BASE_DIR = os.getcwd()
+# --- PERBAIKAN PATH (PENTING) ---
+# Menggunakan abspath(__file__) agar selalu mengarah ke folder script ini berada
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 WORKER_SCRIPT = os.path.join(BASE_DIR, "main.py")
 EMAIL_FILE = os.path.join(BASE_DIR, "email.txt")
 TARGET_FILE = os.path.join(BASE_DIR, "target_email.txt")
+IDX_FILE = os.path.join(BASE_DIR, 'idx_project_urls.txt') # Definisi path di awal
 
 # ================= T E M P L A T E H T M L =================
 # HTML + CSS Bootstrap 5 (Professional UI Upgrade)
@@ -238,7 +241,6 @@ def index():
 
         try:
             # 1. Timpa file email.txt
-            # Mengubah Windows newline (\r\n) menjadi Linux (\n)
             formatted_accounts = raw_accounts.replace('\r\n', '\n')
             with open(EMAIL_FILE, 'w') as f:
                 f.write(formatted_accounts)
@@ -249,9 +251,10 @@ def index():
             with open(TARGET_FILE, 'w') as f:
                 f.write(target_email)
                 
-            idx_file_path = os.path.join(BASE_DIR, 'idx_project_urls.txt')
-            with open(idx_file_path, 'w') as f:
-                f.write('')    
+            # --- RESET FILE IDX (DIPERBAIKI) ---
+            # Menggunakan variabel IDX_FILE yang sudah didefinisikan dengan benar
+            with open(IDX_FILE, 'w') as f:
+                pass # Membuka dengan 'w' sudah cukup untuk menghapus isinya
 
             # 3. Jalankan Worker dengan xvfb-run (Background Process)
             if os.path.exists(WORKER_SCRIPT):
