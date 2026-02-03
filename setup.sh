@@ -25,7 +25,6 @@ NEED_REBOOT=false
 # ==========================================
 # 1. SYSTEM & DEPENDENCIES
 # ==========================================
-# Mengatur frontend agar tidak muncul dialog interaktif saat install
 export DEBIAN_FRONTEND=noninteractive
 
 if ! command -v xvfb &> /dev/null; then
@@ -59,7 +58,7 @@ else
 
     # Install
     apt-get install -y /tmp/chrome109.deb
-    apt-get install -f -y # Fix dependencies jika ada error
+    apt-get install -f -y 
 
     # Bersihkan file installer
     rm -f /tmp/chrome109.deb
@@ -67,7 +66,6 @@ else
     # Kunci versi agar tidak auto-update
     apt-mark hold google-chrome-stable
     
-    # Set flag reboot karena habis install core system
     NEED_REBOOT=true
 fi
 
@@ -84,7 +82,6 @@ mkdir -p "$DIR"
 cd "$DIR" || exit
 
 echo -e "\n${GREEN}[+] Mendownload script dari Repository...${NC}"
-echo -e "Source: $REPO"
 wget -q -O main.py "$REPO/main.py"
 wget -q -O agent.py "$REPO/agent.py"
 
@@ -107,21 +104,75 @@ StandardError=append:$DIR/service_error.log
 WantedBy=multi-user.target
 EOF
 
-# Reload daemon dan enable service
 systemctl daemon-reload
 systemctl enable ghost-agent
 
 # ==========================================
-# 5. FINISHING
+# 5. MEMBUAT SHORTCUT COMMAND (DOTAUTO)
+# ==========================================
+echo -e "\n${GREEN}[+] Membuat shortcut command 'dotauto'...${NC}"
+
+# Menggunakan 'EOF' (dengan kutip) agar variabel $1 tidak dieksekusi saat pembuatan file
+cat > /usr/local/bin/dotauto <<'EOF'
+#!/bin/bash
+
+# Warna
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+SERVICE="ghost-agent"
+
+case "$1" in
+    start)
+        echo -e "${GREEN}>>> Menyalakan Bot...${NC}"
+        systemctl start $SERVICE
+        echo -e "✅ Bot Berjalan."
+        ;;
+    stop)
+        echo -e "${RED}>>> Mematikan Bot...${NC}"
+        systemctl stop $SERVICE
+        echo -e "🛑 Bot Berhenti."
+        ;;
+    restart)
+        echo -e "${YELLOW}>>> Merestart Bot...${NC}"
+        systemctl restart $SERVICE
+        echo -e "✅ Bot berhasil direstart."
+        ;;
+    log)
+        echo -e "${CYAN}>>> Menampilkan Log (Tekan CTRL+C untuk keluar)...${NC}"
+        tail -f /root/auto/service.log
+        ;;
+    status)
+        systemctl status $SERVICE --no-pager
+        ;;
+    *)
+        echo -e "Usage: dotauto {start|stop|restart|log|status}"
+        exit 1
+        ;;
+esac
+EOF
+
+# Berikan izin eksekusi
+chmod +x /usr/local/bin/dotauto
+
+# ==========================================
+# 6. FINISHING
 # ==========================================
 if [ "$NEED_REBOOT" = true ]; then
-    MSG="✅ <b>INSTALL COMPLETED (Chrome Updated)</b>%0AIP: <code>$IP</code>%0AStatus: <b>Rebooting...</b>"
     echo -e "\n${RED}>>> System perlu reboot untuk menerapkan perubahan Chrome.${NC}"
     echo -e ">>> Rebooting in 3 seconds..."
     sleep 3
     reboot
 else
-    # Jika tidak perlu reboot, restart service bot saja agar update applied
     echo -e "\n${GREEN}>>> Script updated. Service restarted.${NC}"
-    systemctl restart ghost-agent
+    # Restart bot menggunakan command baru
+    dotauto restart
+    echo -e "\n${CYAN}INFO COMMAND:${NC}"
+    echo -e "Sekarang gunakan perintah ini:"
+    echo -e "  - ${GREEN}dotauto start${NC}   : Nyalakan bot"
+    echo -e "  - ${RED}dotauto stop${NC}    : Matikan bot"
+    echo -e "  - ${YELLOW}dotauto restart${NC} : Restart bot"
+    echo -e "  - ${CYAN}dotauto log${NC}     : Cek log error/jalan"
 fi
