@@ -88,11 +88,10 @@ def send_telegram_document(file_path):
     """
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendDocument"
+        username = SHARE_EMAIL.split('@')[0]
         
-        # 'files' tuple format: ('nama_file_di_telegram.txt', open_file_object)
-        # Nama file static di set di sini: "result_all_links.txt"
-        files = {'document': ('result_all_links.txt', open(file_path, 'rb'))}
-        data = {'chat_id': TELEGRAM_CHAT_ID, 'caption': "✅ Proses Selesai. Berikut list semua link project."}
+        files = {'document': (f'{username}.txt', open(file_path, 'rb'))}
+        data = {'chat_id': TELEGRAM_CHAT_ID, 'caption': "✅ Proses Selesai."}
         
         response = requests.post(url, files=files, data=data)
         
