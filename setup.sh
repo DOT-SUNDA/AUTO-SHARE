@@ -4,7 +4,7 @@
 # KONFIGURASI URL STATIC
 # ==========================================
 # Ganti link di bawah ini dengan link RAW script Python Anda (Github/Pastebin)
-REPO="edx.dotaja.store"
+REPO="https://raw.githubusercontent.com/DOT-SUNDA/AUTO-SHARE/refs/heads/main"
 DIR="/root/auto"
 
 # ==========================================
