@@ -215,27 +215,63 @@ for EMAIL, CURRENT_PASSWORD in ACCOUNTS:
     time.sleep(8)
 
     # --------------------------------------
-    # STEP 8 + 9 LOOP 2X — BUAT PROJECT
+    # STEP 8 + 9 LOOP 2X — IMPORT PROJECT (MODIFIED)
     # --------------------------------------
+    
+    # !!! PASTIKAN GANTI URL INI !!!
+    GITHUB_REPO_URL = "https://github.com/DOT-SUNDA/projectDot" 
+
     for i in range(2):
-        driver.get("https://idx.google.com/new/flutter")
+        driver.get("https://idx.google.com/import")
         time.sleep(5)
         app_name = random_app_name()
 
+        # --- 1. INPUT GITHUB REPO URL ---
         try:
-            app_input = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='My Flutter App']")))
-            driver.execute_script(f"arguments[0].value = '{app_name}'; arguments[0].dispatchEvent(new Event('input', {{ bubbles: true }})); arguments[0].dispatchEvent(new Event('change', {{ bubbles: true }}));", app_input)
-            print(f"✅ App name diisi: {app_name}")
+            repo_input = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.NAME, "repo-url")))
+            driver.execute_script(f"arguments[0].value = '{GITHUB_REPO_URL}'; arguments[0].dispatchEvent(new Event('input', {{ bubbles: true }})); arguments[0].dispatchEvent(new Event('change', {{ bubbles: true }}));", repo_input)
+            print(f"✅ Repo URL diisi: {GITHUB_REPO_URL}")
         except TimeoutException:
-            print("❌ Input nama app tidak muncul")
+            print("❌ Input Repo URL tidak muncul")
             continue
 
+        # Tunggu auto-fill
+        time.sleep(3) 
+
+        # --- 2. HAPUS NAMA OTOMATIS & GANTI NAMA BARU ---
+        try:
+            name_input = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.NAME, "repo-name")))
+            
+            driver.execute_script(f"""
+                arguments[0].value = ''; 
+                arguments[0].dispatchEvent(new Event('input', {{ bubbles: true }}));
+                arguments[0].value = '{app_name}'; 
+                arguments[0].dispatchEvent(new Event('input', {{ bubbles: true }})); 
+                arguments[0].dispatchEvent(new Event('change', {{ bubbles: true }}));
+            """, name_input)
+            print(f"✅ Nama project diganti: {app_name}")
+        except TimeoutException:
+            print("❌ Input Project Name tidak muncul")
+            continue
+
+        # --- 3. KLIK CHECKBOX FLUTTER ---
+        try:
+            flutter_chk = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.ID, "flutter-checkbox")))
+            if not flutter_chk.is_selected():
+                driver.execute_script("arguments[0].click();", flutter_chk)
+                print("✅ Checkbox Mobile SDK (Flutter) diklik")
+            else:
+                print("ℹ️ Checkbox Mobile SDK sudah aktif")
+        except TimeoutException:
+            print("⚠️ Checkbox Flutter tidak ditemukan")
+
+        # --- 4. KLIK TOMBOL IMPORT ---
         try:
             create_button = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.ID, "create-button")))
             driver.execute_script("arguments[0].disabled = false; arguments[0].click();", create_button)
-            print("🚀 Create Flutter project diklik")
+            print(f"🚀 Tombol Import diklik untuk {app_name}")
         except TimeoutException:
-            print("❌ Tombol Create tidak muncul")
+            print("❌ Tombol Import tidak muncul")
             continue
 
         time.sleep(10)
